@@ -1,33 +1,58 @@
 import numpy as np
-from scipy.integrate import trapezoid, simpson, fixed_quad
-n = 100
+import scipy.integrate as spi
+import matplotlib.pyplot as plt
 
-# 3a: ∫₀² eˣ/(1+x²) dx
-def f_a(x):
-    return np.exp(x)/(1 + x**2)
+# 1. Approximating integral using Trapezoidal, Midpoint, and Simpson's Rule
+def f(x):
+    return np.exp(-x**2)  # Example function, update based on the actual integral
 
-x_a = np.linspace(0, 2, n+1)
-y_a = f_a(x_a)
+a, b = 0, 1  # Define integral limits
+n = 10  # Number of subintervals
 
-trap_a = trapezoid(y_a, x_a)
-mid_a = fixed_quad(f_a, 0, 2, n=n)[0]
-simp_a = simpson(y_a, x_a)
+# Trapezoidal Rule
+x_trap = np.linspace(a, b, n+1)
+y_trap = f(x_trap)
+trap_result = np.trapz(y_trap, x_trap)
 
-print(f"3a Trapezoidal: {trap_a:.6f}")
-print(f"3a Midpoint: {mid_a:.6f}")
-print(f"3a Simpson's: {simp_a:.6f}")
+# Midpoint Rule
+x_mid = (x_trap[:-1] + x_trap[1:]) / 2
+y_mid = f(x_mid)
+mid_result = np.sum(y_mid) * (b-a)/n
 
-# 3b: ∫₀^(π/2) (1+cos x)^(1/3) dx
-def f_b(x):
-    return (1 + np.cos(x))**(1/3)
+# Simpson's Rule
+simp_result = spi.simpson(y_trap, x_trap)
 
-x_b = np.linspace(0, np.pi/2, n+1)
-y_b = f_b(x_b)
+print(f"Trapezoidal Rule Approximation: {trap_result:.6f}")
+print(f"Midpoint Rule Approximation: {mid_result:.6f}")
+print(f"Simpson's Rule Approximation: {simp_result:.6f}")
 
-trap_b = trapezoid(y_b, x_b)
-mid_b = fixed_quad(f_b, 0, np.pi/2, n=n)[0]
-simp_b = simpson(y_b, x_b)
+# 2. Estimating values for t = [2,5,10,100,1000,10000]
+def series_sum(t):
+    return np.sum([1/(1 + n**2) for n in range(1, t+1)])
 
-print(f"3b Trapezoidal: {trap_b:.6f}")
-print(f"3b Midpoint: {mid_b:.6f}")
-print(f"3b Simpson's: {simp_b:.6f}")
+t_values = [2, 5, 10, 100, 1000, 10000]
+series_results = [series_sum(t) for t in t_values]
+
+for t, result in zip(t_values, series_results):
+    print(f"Sum for t={t}: {result:.6f}")
+
+# 3. Graphing functions for Comparison Theorem
+def g(x):
+    return 1/(1 + x**2)
+
+def h(x):
+    return 1/x**2
+
+x_vals = np.linspace(1, 10, 100)
+y_g = g(x_vals)
+y_h = h(x_vals)
+
+plt.figure(figsize=(8,6))
+plt.plot(x_vals, y_g, label='f(x) = 1/(1+x^2)', color='blue')
+plt.plot(x_vals, y_h, label='g(x) = 1/x^2', linestyle='dashed', color='red')
+plt.xlabel('x')
+plt.ylabel('Function Values')
+plt.legend()
+plt.title('Comparison of f(x) and g(x)')
+plt.grid()
+plt.show()
